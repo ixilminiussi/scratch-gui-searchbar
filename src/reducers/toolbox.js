@@ -1,5 +1,5 @@
 const UPDATE_TOOLBOX = 'scratch-gui/toolbox/UPDATE_TOOLBOX';
-import makeToolboxXML from '../lib/make-toolbox-xml';
+import { makeToolboxXML } from '../lib/custom-toolbox-xml';
 
 const initialState = {
     toolboxXML: makeToolboxXML(true)

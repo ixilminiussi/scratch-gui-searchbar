@@ -1,4 +1,4 @@
-import ScratchBlocks from 'scratch-blocks';
+import ScratchBlocks from 'idm-scratch-blocks-searchbar';
 
 const categorySeparator = '<sep gap="36"/>';
 

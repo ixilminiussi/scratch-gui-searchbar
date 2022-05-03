@@ -1,6 +1,4 @@
 version: 2.1
-orbs:
-    browser-tools: circleci/browser-tools@1.2.4
 aliases:
   - &save_git_cache
     save_cache:
@@ -42,10 +40,7 @@ aliases:
         - v3-npm-
   - &defaults
     docker:
-      - image: cimg/node:12.22.11-browsers
-        auth:
-          username: $DOCKERHUB_USERNAME
-          password: $DOCKERHUB_PASSWORD
+      - image: circleci/node:10-browsers
     working_directory: ~/repo
 
 jobs:
@@ -71,16 +66,11 @@ jobs:
           environment:
             NODE_ENV: production
           command: npm run build
-      - browser-tools/install-chrome
-      - browser-tools/install-chromedriver
       - run:
           name: Integration
           environment:
               JEST_JUNIT_OUTPUT_NAME: integration-results.xml
-          command: |
-              google-chrome --version
-              chromedriver --version
-              npm run test:integration -- --reporters="default" --reporters="jest-junit"
+          command: npm run test:integration -- --reporters="default" --reporters="jest-junit"
       - store_artifacts:
           path: coverage
       - store_test_results:
@@ -157,15 +147,11 @@ jobs:
       - checkout
       - *restore_npm_cache
       - *restore_build_cache
-      - browser-tools/install-chrome
-      - browser-tools/install-chromedriver
       - run:
           name: Integration
           environment:
               JEST_JUNIT_OUTPUT_DIR: test-results/integration
           command: |
-            google-chrome --version
-            chromedriver --version
             export TESTFILES=$(circleci tests glob "test/integration/*.test.js" | circleci tests split --split-by=timings)
             $(npm bin)/jest ${TESTFILES} --reporters="default" --reporters="jest-junit" --runInBand
       - store_test_results:
@@ -226,20 +212,14 @@ workflows:
               only:
                 - develop
     jobs:
-      - setup:
-          context:
-            - dockerhub-credentials
+      - setup
       - push-translations:
-          context:
-            - dockerhub-credentials
           requires:
               - setup
 
   build-test-no-deploy:
     jobs:
       - build-test-no-cache:
-          context:
-            - dockerhub-credentials
           filters:
             branches:
               ignore:
@@ -249,8 +229,6 @@ workflows:
   build-test-deploy:
     jobs:
       - setup:
-          context:
-            - dockerhub-credentials
           filters:
             branches:
               only:
@@ -258,28 +236,18 @@ workflows:
                 - develop
                 - /^hotfix\/.*/
       - lint:
-          context:
-            - dockerhub-credentials
           requires:
             - setup
       - unit:
-          context:
-            - dockerhub-credentials
           requires:
             - setup
       - build:
-          context:
-            - dockerhub-credentials
           requires:
             - setup
       - integration:
-          context:
-            - dockerhub-credentials
           requires:
             - build
       - store_build:
-          context:
-            - dockerhub-credentials
           requires:
             - build
           filters:
@@ -289,8 +257,6 @@ workflows:
                 - develop
                 - /^hotfix\/.*/
       - store_dist:
-          context:
-            - dockerhub-credentials
           requires:
             - build
           filters:
@@ -300,8 +266,6 @@ workflows:
                 - develop
                 - /^hotfix\/.*/
       - deploy-npm:
-          context:
-            - dockerhub-credentials
           requires:
             - lint
             - unit
@@ -314,8 +278,6 @@ workflows:
                 - develop
                 - /^hotfix\/.*/
       - deploy-gh-pages:
-          context:
-            - dockerhub-credentials
           requires:
             - lint
             - unit

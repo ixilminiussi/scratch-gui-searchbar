@@ -1,0 +1,3 @@
+import React from 'react'
+
+export const GUIContext = React.createContext();

@@ -17,3 +17,6 @@ npm-*
 # Generated translation files
 /translations
 /locale
+node_modules
+node_modules
+npm-debug.log
